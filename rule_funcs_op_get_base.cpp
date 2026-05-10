@@ -595,3 +595,29 @@ cmd_op_func func_base_op_get_gcmdnextex = [](
 	};
 
 cmd_op_func func_base_op_get_gcmdlastex = func_base_op_get_gcmdnextex;
+
+cmd_op_func func_base_op_get_gstack = [](
+	const rule& owner,
+	const operand& op,
+	command_operand& save
+	)->bool
+	{
+		std::vector<var_single> param_get;
+
+		if (owner.get_op_by_op(op, 4, param_get) == false)
+			return false;
+
+		operand op_get_stack;
+		operand op_save;
+
+		if (owner.get_op_by_var(param_get[0], param_get[1], op_get_stack) == false)
+			return false;
+
+		if (owner.get_op_by_var(param_get[2], param_get[3], op_save, operand_type::immediate) == false)
+			return false;
+
+
+		save.emplace<static_cast<size_t>(oq::two)>(op_get_stack, op_save);
+
+		return true;
+	};
