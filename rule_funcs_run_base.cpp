@@ -2525,3 +2525,111 @@ cmd_run_func func_base_run_gcmdlastex = [](
 
 		return;
 	};
+
+cmd_run_func func_base_run_gstack = [](
+	rule& owner_rule,
+	rule_manager& owner_rule_manager,
+	rule_interrupt& interrupt,
+	command_index cmd_index_current,
+	command& cmd_current,
+	std::optional<command_index>& cmd_index_next,
+	std::vector<var_single>& result,
+	bool& is_end
+	)->void
+	{
+		cmd_index_next = std::nullopt;
+		is_end = false;
+
+		const operand& op_get_quan = std::get<operand_set<oq::two>>(cmd_current.op)[oi::first];
+		std::optional<var_single> rule_target = owner_rule.get_var_value(op_get_quan);
+
+		if (rule_target.has_value() == false)
+		{
+			interrupt = rule_interrupt(
+				rule_interrupt_type::invalid_var,
+				std::make_optional<rule_interrupt_value_invalid>(
+					cmd_index_current,
+					op_get_quan
+				),
+				"调用栈查询数量操作数无效，无法获取"
+			);
+			is_end = true;
+
+			return;
+		}
+
+		size_t quan = static_cast<size_t>(rule_target.value());
+
+		if (quan > owner_rule_manager.stack.size())
+		{
+			interrupt = rule_interrupt(
+				rule_interrupt_type::invalid,
+                std::nullopt,
+				"调用栈查询数量超过当前上限，无法获取"
+			);
+			is_end = true;
+
+			return;
+		}
+
+		std::vector<var_single> stack_info_write;
+		std::vector<rule_manager_stack>::const_iterator it = owner_rule_manager.stack.end();
+
+		stack_info_write.assign(quan * 2, static_cast<var_single>(RULE_INVALID_INDEX));
+
+		for (size_t index = 0; index < quan; index += 2)
+		{
+			rule_index rule_index_last = (it - index - 1)->index;
+
+			std::optional<rule*> rule_last = owner_rule_manager.get_rule(rule_index_last);
+
+			if (rule_last.has_value() == false)
+			{
+				interrupt = rule_interrupt(
+					rule_interrupt_type::invalid,
+					std::nullopt,
+					"调用栈查询规则失败"
+				);
+				is_end = true;
+
+				return;
+			}
+
+			std::optional<command_index> cmd_index_last = rule_last.value()->rule_command.get_command_index_last(rule_index_last);
+
+			if (cmd_index_last.has_value() == false)
+			{
+				interrupt = rule_interrupt(
+					rule_interrupt_type::invalid,
+					std::nullopt,
+					"调用栈查询指令失败"
+				);
+				is_end = true;
+
+				return;
+			}
+
+
+			stack_info_write[index] = static_cast<var_single>(rule_index_last);
+			stack_info_write[index + 1] = static_cast<var_single>(cmd_index_last.value());
+		}
+
+		const operand& op_save = std::get<operand_set<oq::two>>(cmd_current.op)[oi::second];
+
+		if (owner_rule.set_var_value(op_save, stack_info_write) == false)
+		{
+			interrupt = rule_interrupt(
+				rule_interrupt_type::invalid_var,
+				std::make_optional<rule_interrupt_value_invalid>(
+					cmd_index_current,
+					op_save
+				),
+				"调用栈查询保存操作数无效，无法写入"
+			);
+			is_end = true;
+
+			return;
+		}
+
+		return;
+	};
