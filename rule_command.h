@@ -86,6 +86,9 @@ enum class command_type :data_type_unsigned_base
 	//-----------------------------------------------------------
 	//                       target rule     target cmd     idx save    save begin
 	gcmdlastex,// gcmdlastex imm/var/proxy , imm/var/proxy , var/proxy , var/proxy
+	//-----------------------------------------------------------
+	//                 quantity        save
+	gstack,// gstack imm/var/proxy , var/proxy
 
 
 	invalid,
