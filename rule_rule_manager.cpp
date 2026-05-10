@@ -346,6 +346,7 @@ rule_manager::rule_manager() :
 	this->funcs[static_cast<size_t>(command_type::gcmdex)] = cmd_funcs(func_base_run_gcmdex, func_base_op_get_gcmdex);
 	this->funcs[static_cast<size_t>(command_type::gcmdnextex)] = cmd_funcs(func_base_run_gcmdnextex, func_base_op_get_gcmdnextex);
 	this->funcs[static_cast<size_t>(command_type::gcmdlastex)] = cmd_funcs(func_base_run_gcmdlastex, func_base_op_get_gcmdlastex);
+	this->funcs[static_cast<size_t>(command_type::gstack)] = cmd_funcs(func_base_run_gstack, func_base_op_get_gstack);
 }
 rule_manager::~rule_manager()
 {
