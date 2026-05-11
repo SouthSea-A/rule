@@ -2573,13 +2573,13 @@ cmd_run_func func_base_run_gstack = [](
 		}
 
 		std::vector<var_single> stack_info_write;
-		std::vector<rule_manager_stack>::const_iterator it = owner_rule_manager.stack.end();
+		std::vector<rule_manager_stack>::const_reverse_iterator it = owner_rule_manager.stack.rbegin();
 
 		stack_info_write.assign(quan * 2, static_cast<var_single>(RULE_INVALID_INDEX));
 
-		for (size_t index = 0; index < quan; index += 2)
+		for (size_t index = 0; index < quan; index++)
 		{
-			rule_index rule_index_last = (it - index - 1)->index;
+			rule_index rule_index_last = (++it)->index;
 
 			std::optional<rule*> rule_last = owner_rule_manager.get_rule(rule_index_last);
 
@@ -2610,8 +2610,8 @@ cmd_run_func func_base_run_gstack = [](
 			}
 
 
-			stack_info_write[index] = static_cast<var_single>(rule_index_last);
-			stack_info_write[index + 1] = static_cast<var_single>(cmd_index_last.value());
+			stack_info_write[index * 2] = static_cast<var_single>(rule_index_last);
+			stack_info_write[index * 2 + 1] = static_cast<var_single>(cmd_index_last.value());
 		}
 
 		const operand& op_save = std::get<operand_set<oq::two>>(cmd_current.op)[oi::second];
