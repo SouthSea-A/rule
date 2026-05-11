@@ -360,7 +360,7 @@ bool rule_manager::set_begin(rule_index index)
 	this->begin = index;
 	return true;
 }
-bool rule_manager::set_param(rule_index index, const std::vector<var_single>& param)
+bool rule_manager::set_param(rule_index index, std::span<const var_single> param)
 {
 	std::optional<rule_unit*> rule_target_result = get_rule_unit_ptr(index);
 
@@ -475,7 +475,17 @@ bool rule_manager::run(std::vector<var_single>& result)
 		}
 		case rule_interrupt_type::end:
 		{
-			
+			if (this->stack.empty() == false)
+			{
+				const rule_manager_stack& last = this->stack.back();
+				std::optional<rule*> rule_return = get_rule(last.index);
+
+				if (rule_return.has_value() == false)
+					break;
+
+				rule_return.value()->set_var_value(static_cast<operand>(last.save), result);
+			}
+
 			break;
 		}
 		default:
