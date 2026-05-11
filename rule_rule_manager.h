@@ -58,6 +58,7 @@ extern cmd_run_func func_base_run_dcmdex;
 extern cmd_run_func func_base_run_gcmdex;
 extern cmd_run_func func_base_run_gcmdnextex;
 extern cmd_run_func func_base_run_gcmdlastex;
+extern cmd_run_func func_base_run_gstack;
 
 extern cmd_op_func func_base_op_get_mov;
 extern cmd_op_func func_base_op_get_cmp;
@@ -90,6 +91,7 @@ extern cmd_op_func func_base_op_get_dcmdex;
 extern cmd_op_func func_base_op_get_gcmdex;
 extern cmd_op_func func_base_op_get_gcmdnextex;
 extern cmd_op_func func_base_op_get_gcmdlastex;
+extern cmd_op_func func_base_op_get_gstack;
 
 class rule_manager
 {
@@ -113,7 +115,7 @@ public:
 	~rule_manager();
 public:
 	bool set_begin(rule_index index);
-	bool set_param(rule_index index, const std::vector<var_single>& param);
+	bool set_param(rule_index index, std::span<const var_single> param);
 	std::optional<rule_index> add_rule();
 	bool del_rule(rule_index index);
 	std::optional<rule*> get_rule(rule_index index);
