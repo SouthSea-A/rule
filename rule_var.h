@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <optional>
+#include <span>
 #include "rule_base.h"
 
 using var_single = data_type_unsigned_base;
@@ -54,8 +55,8 @@ public:
 	bool get_var(std::vector<var_single>& save, var_index start, size_t quantity)const;
 	bool set_var(const var& var_change);
 	bool set_var(var_index index, var_single content);
-	bool set_var(const std::vector<var_single>& var_all);
-	bool set_var(var_index index_begin, const std::vector<var_single>& var_all);
+	bool set_var(std::span<const var_single> var_all);
+	bool set_var(var_index index_begin, std::span<const var_single> var_all);
 	std::optional<size_t> get_quantity_var() const;
 public:
 	var_manager& operator=(const var_manager& other);
