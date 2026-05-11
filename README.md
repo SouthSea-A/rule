@@ -48,8 +48,8 @@
   |bool get_var(std::vector<var_single>& save, var_index start, size_t quantity) const|提供变量内容保存容器 **save** 、起始变量编号 **index** 和 读取数量 **quantity**，从变量 **index** 开始，按序逐个读取往后比其编号大的变量，直到满足数量要求，并将结果按序保存在 **save** 中。如果读取数量大于实际数量，则返回 **false** ，反之为 **true**|
   |bool set_var(const var& var_change)|按照提供的 **var** 结构中的变量信息，设置变量新内容。如果变量不存在，返回 **false** ，反之为 **true**|
   |bool set_var(var_index index, var_single content)|提供变量编号 **index** 和 变量内容**content** ，设置变量新内容。如果变量不存在，返回 **false** ，反之为 **true**|
-  |bool set_var(const std::vector<var_single>& var_all)|提供有序的变量内容容器 **var_all**，从此容器的第一个元素开始，按序从实际储存的最小编号的变量开始，逐个往后比前一个编号大的变量进行内容覆写。如果写入的变量数量大于实际储存的变量数量，则返回 **false** ，反之为 **true**|
-  |bool set_var(var_index index_begin, const std::vector<var_single>& var_all)|提供起始变量编号 **index** 和有序的变量内容容器 **var_all**，从此容器的第一个元素开始，按序从编号为 **index** 的变量开始开始，逐个往后比前一个编号大的变量进行内容覆写。如果写入的变量数量大于实际储存的变量数量，则返回 **false** ，反之为 **true**|
+  |bool set_var(std::span<const var_single\> var_all)|提供有序的变量内容容器 **var_all**，从此容器的第一个元素开始，按序从实际储存的最小编号的变量开始，逐个往后比前一个编号大的变量进行内容覆写。如果写入的变量数量大于实际储存的变量数量，则返回 **false** ，反之为 **true**|
+  |bool set_var(var_index index_begin, std::span<const var_single\> var_all)|提供起始变量编号 **index** 和有序的变量内容容器 **var_all**，从此容器的第一个元素开始，按序从编号为 **index** 的变量开始开始，逐个往后比前一个编号大的变量进行内容覆写。如果写入的变量数量大于实际储存的变量数量，则返回 **false** ，反之为 **true**|
   |std::optional<size_t> get_quantity_var() const|获取变量的数量，返回 **std::optional<size_t>** ，如果没有变量，则返回 **std::nullopt**|
   |var_manager& operator=(const var_manager& other)|本类的 **=** 操作符重载|
 ---
@@ -260,12 +260,12 @@
   |std::optional<var_single> get_var_value(const operand& op) const|按照提供的操作数 **op**，获取其指向的变量内容。支持立即数直接返回、普通变量直接读取、代理变量间接寻址后读取。如果变量不存在，则返回 **std::nullopt**|
   |bool get_var_value(const operand& op, size_t quan, std::vector<var_single>& save) const|按照提供的操作数 **op**、读取数量 **quan** 和保存容器 **save**，从操作数指向的变量开始，连续读取 **quan** 个变量内容到 **save** 中。支持立即数(只能读1个)、普通变量、代理变量等。如果读取失败或数量不足，返回 **false**，反之为 **true**|
   |bool set_var_value(const operand& op_src, var_single value, bool is_allow_dynamic_alloc = true)|按照提供的目标操作数 **op_src** 和内容 **value**，设置变量内容。如果 **is_allow_dynamic_alloc** 为 **true** 且目标变量不存在，则自动创建后再写入；为 **false** 则只写入已存在的变量。支持代理变量的间接寻址写入。写入成功返回 **true**，否则为 **false**|
-  |bool set_var_value(const operand& op_src, const std::vector<var_single>& value_all)|按照提供的目标操作数 **op_src** 和内容序列 **value_all**，从目标变量开始，连续写入多个变量内容。支持代理变量的间接寻址。写入成功返回 **true**，否则为 **false**|
+  |bool set_var_value(const operand& op_src, std::span<const var_single\> value_all)|按照提供的目标操作数 **op_src** 和内容序列 **value_all**，从目标变量开始，连续写入多个变量内容。支持代理变量的间接寻址。写入成功返回 **true**，否则为 **false**|
   |bool get_op_by_op(const operand& op_begin, size_t quantity, std::vector<var_single>& save) const|按照提供的起始操作数 **op_begin** 和数量 **quantity**，从该操作数指向的变量开始，连续读取 **quantity** 个变量内容到 **save** 中。用于将一段连续的变量数据作为操作数参数来源。成功返回 **true**，否则为 **false**|
   |bool get_op_by_var(var_single type, var_single content, operand& save, operand_type invalid_type = operand_type::invalid) const|按照提供的类型码 **type** 和内容 **content**，构造一个操作数并保存到 **save** 中。**type** 对5取模后映射到操作数类型(0=立即数，1=参数变量，2=普通变量，3=参数代理，4=普通代理)。如果映射后的类型等于 **invalid_type** ，则返回 **false**|
   |bool get_op_by_cmd_op(command_type cmd_type, const operand& op, std::unordered_map<size_t, cmd_funcs>& cmd_set, command_operand& save) const|按照提供的指令类型 **cmd_type** 和起始操作数 **op**，调用对应指令的操作数提取函数，从变量中解析出完整的操作数集合并保存到 **save** 中。成功返回 **true**，否则为 **false**|
   |void get_info_by_cmd(const command& cmd_op, std::vector<var_single>& save) const|按照提供的指令 **cmd_op**，提取其完整信息(指令类型码 + 每个操作数的类型码和内容)并按序保存到 **save** 中。主要用于查询指令时的信息导出|
-  |bool set_param(const std::vector<var_single>& param)|按照提供的参数内容序列 **param**，设置当前规则的参数变量池的内容。成功返回 **true**，否则为 **false**|
+  |bool set_param(std::span<const var_single\> param)|按照提供的参数内容序列 **param**，设置当前规则的参数变量池的内容。成功返回 **true**，否则为 **false**|
   |std::optional<size_t> get_param_quantity() const|获取当前规则的参数数量，返回 **std::optional<size_t>**。如果没有参数，则返回 **std::nullopt**|
   |std::optional<command_index> get_begin() const|获取当前规则的起始指令编号，如果不存在，则返回 **std::nullopt**|
   |std::optional<command_index> get_end() const|获取当前规则的结束指令编号，如果不存在，则返回 **std::nullopt**|
@@ -316,7 +316,7 @@
   |void get_operand_text(const operand& op, std::string& save) const|按照提供的操作数 **op**，将其信息格式化为可读的文本并保存到 **save** 中。主要用于调试输出|
   |void get_interrupt_text(rule_index index, const rule_interrupt& interrupt, std::string& save) const|按照提供的规则编号 **index** 和中断信息 **interrupt**，将中断的详细信息格式化为可读的文本并保存到 **save** 中。主要用于调试输出|
   |bool set_begin(rule_index index)|设置起始规则编号，失败返回 **false**，反之为 **true**|
-  |bool set_param(rule_index index, const std::vector<var_single>& param)|按照提供的规则编号 **index** 和参数内容序列 **param**，设置目标规则的参数变量池。成功返回 **true**，否则为 **false**|
+  |bool set_param(rule_index index, std::span<const var_single\> param)|按照提供的规则编号 **index** 和参数内容序列 **param**，设置目标规则的参数变量池。成功返回 **true**，否则为 **false**|
   |std::optional<rule_index> add_rule()|创建一个新的空白规则，返回新规则的编号。如果创建失败，则返回 **std::nullopt**|
   |bool del_rule(rule_index index)|按照提供的 **index** 规则编号删除规则，如果规则不存在或已被删除，则返回 **false**，反之为 **true**|
   |std::optional<rule\*> get_rule(rule_index index)|按照提供的 **index** 规则编号获取规则的指针。如果规则不存在或已被删除，则返回 **std::nullopt**|
