@@ -91,7 +91,7 @@ public:
 	std::optional<var_single> get_var_value(const operand& op) const;
 	bool get_var_value(const operand& op, size_t quan, std::vector<var_single>& save) const;
 	bool set_var_value(const operand& op_src, var_single value, bool is_allow_dynamic_alloc = true);
-	bool set_var_value(const operand& op_src, const std::vector<var_single>& value_all);
+	bool set_var_value(const operand& op_src, std::span<const var_single> value_all);
 	bool get_op_by_op(const operand& op_begin, size_t quantity, std::vector<var_single>& save) const;
 	bool get_op_by_var(var_single type, var_single content, operand& save, operand_type invalid_type = operand_type::invalid) const;
 	bool get_op_by_cmd_op(command_type cmd_type, const operand& op, std::unordered_map<size_t, cmd_funcs>& cmd_set, command_operand& save) const;
@@ -144,7 +144,7 @@ public:
 	rule();
 	~rule();
 public:
-	bool set_param(const std::vector<var_single>& param);
+	bool set_param(std::span<const var_single> param);
 	std::optional<size_t> get_param_quantity() const;
 	std::optional<command_index> get_begin() const;
 	std::optional<command_index> get_end() const;
