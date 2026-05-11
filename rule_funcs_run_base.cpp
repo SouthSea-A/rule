@@ -2579,7 +2579,7 @@ cmd_run_func func_base_run_gstack = [](
 
 		for (size_t index = 0; index < quan; index++)
 		{
-			rule_index rule_index_last = (++it)->index;
+			rule_index rule_index_last = (it++)->index;
 
 			std::optional<rule*> rule_last = owner_rule_manager.get_rule(rule_index_last);
 
