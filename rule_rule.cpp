@@ -490,7 +490,7 @@ bool rule::set_var_value(const operand& op_src, var_single value, bool is_allow_
 
 	return result;
 }
-bool rule::set_var_value(const operand& op_src, const std::vector<var_single>& value_all)
+bool rule::set_var_value(const operand& op_src, std::span<const var_single> value_all)
 {
 	bool result = false;
 
@@ -677,16 +677,16 @@ bool rule::get_op_by_cmd_op(command_type cmd_type, const operand& op, std::unord
 void rule::get_info_by_cmd(const command& cmd_op, std::vector<var_single>& save) const
 {
 	std::visit(
-		[&](const auto& op_set)
+		[&](const auto& op_set)->auto
 		{
 			constexpr size_t op_quan = std::tuple_size_v<decltype(op_set.set)>;
 
 			save.assign(1 + op_quan * 2, static_cast<var_single>(operand_type::invalid));
 			save.front() = static_cast<var_single>(cmd_op.cmd);
 
-			[&] <size_t... op_case>(std::index_sequence<op_case...>)
+			[&]<size_t... op_case>(std::index_sequence<op_case...>)
 			{
-				(get_info_by_cmd_op_case_single<op_case>(op_set, save), ...);
+				(... , get_info_by_cmd_op_case_single<op_case>(op_set, save));
 			}(std::make_index_sequence<op_quan>{});
 
 		},
@@ -703,7 +703,7 @@ rule::~rule()
 {
 
 }
-bool rule::set_param(const std::vector<var_single>& param)
+bool rule::set_param(std::span<const var_single> param)
 {
 	return this->rule_var_param.set_var(param);
 }
