@@ -213,7 +213,7 @@ bool var_manager::get_var(std::vector<var_single>& save, var_index start, size_t
 	if (this->var_set.size() - pos_start < quantity)
 		return false;
 
-	save.resize(quantity);
+	save.resize(quantity, VAR_DEFAULT_CONTENT);
 
 	std::vector<var_count>::const_iterator src_current = this->var_set.begin() + pos_start;
 	size_t index = 0;
@@ -247,7 +247,7 @@ bool var_manager::set_var(var_index index, var_single content)
 {
 	return set_var(var(index, content));
 }
-bool var_manager::set_var(const std::vector<var_single>& var_all)
+bool var_manager::set_var(std::span<const var_single> var_all)
 {
 	if (var_all.size() > this->var_set.size())
 		return false;
@@ -259,7 +259,7 @@ bool var_manager::set_var(const std::vector<var_single>& var_all)
 
 	return true;
 }
-bool var_manager::set_var(var_index index_begin, const std::vector<var_single>& var_all)
+bool var_manager::set_var(var_index index_begin, std::span<const var_single> var_all)
 {
 	std::optional<size_t> pos_begin = get_var_pos(index_begin);
 
